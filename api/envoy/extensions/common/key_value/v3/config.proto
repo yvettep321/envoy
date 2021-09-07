@@ -17,9 +17,10 @@ option (udpa.annotations.file_status).package_version_status = ACTIVE;
 
 // [#protodoc-title: Key Value Store storage plugin]
 
-// [#alpha:]
 // This shared configuration for Envoy key value stores.
 message KeyValueStoreConfig {
+  option (udpa.annotations.message_status).work_in_progress = true;
+
   // [#extension-category: envoy.common.key_value]
   config.core.v3.TypedExtensionConfig config = 1 [(validate.rules).message = {required: true}];
 }

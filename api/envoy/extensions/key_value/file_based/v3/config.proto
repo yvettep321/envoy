@@ -14,10 +14,11 @@ option (udpa.annotations.file_status).package_version_status = ACTIVE;
 
 // [#protodoc-title: File Based Key Value Store storage plugin]
 
-// [#alpha:]
 // [#extension: envoy.key_value.file_based]
 // This is configuration to flush a key value store out to disk.
 message FileBasedKeyValueStoreConfig {
+  option (udpa.annotations.message_status).work_in_progress = true;
+
   // The filename to read the keys and values from, and write the keys and
   // values to.
   string filename = 1 [(validate.rules).string = {min_len: 1}];
