@@ -25,9 +25,8 @@ option (udpa.annotations.file_status).package_version_status = ACTIVE;
 // where a match tree is specified that indicates (via
 // :ref:`ExecuteFilterAction <envoy_v3_api_msg_extensions.filters.http.composite.v3.ExecuteFilterAction>`)
 // which filter configuration to create and delegate to.
-//
-// [#alpha:]
 message Composite {
+  option (udpa.annotations.message_status).work_in_progress = true;
 }
 
 // Composite match action (see :ref:`matching docs <arch_overview_matching_api>` for more info on match actions).
