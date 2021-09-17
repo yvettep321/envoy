@@ -66,6 +66,14 @@ Minor Behavior Changes
   information.
 * listener: destroy per network filter chain stats when a network filter chain is removed during the listener in-place update.
 * quic: enables IETF connection migration. This feature requires a stable UDP packet routine in the L4 load balancer with the same first-4-bytes in connection id. It can be turned off by setting runtime guard ``envoy.reloadable_features.FLAGS_quic_reloadable_flag_quic_connection_migration_use_new_cid_v2`` to false.
+1.19.2 (Pending)
+=====================
+
+Incompatible Behavior Changes
+-----------------------------
+
+Minor Behavior Changes
+----------------------
 
 Bug Fixes
 ---------
@@ -138,3 +146,13 @@ Deprecated
 * listener: :ref:`reuse_port <envoy_v3_api_field_config.listener.v3.Listener.reuse_port>` has been
   deprecated in favor of :ref:`enable_reuse_port <envoy_v3_api_field_config.listener.v3.Listener.enable_reuse_port>`.
   At the same time, the default has been changed from false to true. See above for more information.
+* listener: fixed an issue on Windows where connections are not handled by all worker threads.
+
+Removed Config or Runtime
+-------------------------
+
+New Features
+------------
+
+Deprecated
+----------

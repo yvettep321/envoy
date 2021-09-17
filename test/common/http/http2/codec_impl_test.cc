@@ -1359,6 +1359,41 @@ TEST_P(Http2CodecImplDeferredResetTest, NoDeferredResetServerIfResetBeforeLocalE
   EXPECT_TRUE(status.ok());
 }
 
+TEST_P(Http2CodecImplDeferredResetTest, NoDeferredResetServerIfResetBeforeLocalEndStream) {
+  initialize();
+
+  InSequence s;
+
+  TestRequestHeaderMapImpl request_headers;
+  HttpTestUtility::addDefaultHeaders(request_headers);
+  EXPECT_CALL(request_decoder_, decodeHeaders_(_, false)).WillOnce(InvokeWithoutArgs([&]() {
+    // Encode headers, encode data and send reset stream from the call stack of decodeHeaders in
+    // order to delay sendPendingFrames processing in those calls until the end of dispatch. The
+    // call to resetStream goes down the regular reset path since local end_stream is not set; the
+    // pending outbound header and data for the reset stream are discarded immediately.
+    ON_CALL(server_connection_, write(_, _))
+        .WillByDefault(Invoke(
+            [&](Buffer::Instance& data, bool) -> void { client_wrapper_.buffer_.add(data); }));
+    TestResponseHeaderMapImpl response_headers{{":status", "200"}};
+    response_encoder_->encodeHeaders(response_headers, false);
+    Buffer::OwnedImpl body(std::string(1024 * 1024, 'a'));
+    EXPECT_CALL(server_stream_callbacks_, onAboveWriteBufferHighWatermark()).Times(AnyNumber());
+    response_encoder_->encodeData(body, false);
+    EXPECT_CALL(server_stream_callbacks_, onResetStream(StreamResetReason::LocalReset, _));
+    response_encoder_->getStream().resetStream(StreamResetReason::LocalReset);
+  }));
+  EXPECT_TRUE(request_encoder_->encodeHeaders(request_headers, false).ok());
+
+  MockStreamCallbacks client_stream_callbacks;
+  request_encoder_->getStream().addCallbacks(client_stream_callbacks);
+  EXPECT_CALL(response_decoder_, decodeHeaders_(_, _)).Times(0);
+  EXPECT_CALL(response_decoder_, decodeData(_, _)).Times(0);
+  EXPECT_CALL(client_stream_callbacks, onResetStream(StreamResetReason::RemoteReset, _));
+  setupDefaultConnectionMocks();
+  auto status = client_wrapper_.dispatch(Buffer::OwnedImpl(), *client_);
+  EXPECT_TRUE(status.ok());
+}
+
 class Http2CodecImplFlowControlTest : public Http2CodecImplTest {};
 
 // Back up the pending_sent_data_ buffer in the client connection and make sure the watermarks fire
